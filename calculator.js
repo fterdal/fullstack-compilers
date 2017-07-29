@@ -48,9 +48,9 @@ Calculator.prototype.get = function() {
   return this.tokenStream.shift();
 }
 
-function TreeNode(name){
+function TreeNode(name, ...children){
   this.name = name;
-  this.children = arguments;
+  this.children = children;
 }
 
 Calculator.prototype.parseExpression = function(){
@@ -58,14 +58,13 @@ Calculator.prototype.parseExpression = function(){
     var a = this.parseA();
 
     return new TreeNode("Expression", term, a);
-
 }
 
 Calculator.prototype.parseTerm = function(){
   var factor = this.parseFactor();
   var b = this.parseB();
 
-  return TreeNode("Term", factor, b);
+  return new TreeNode("Term", factor, b);
 }
 
 Calculator.prototype.parseFactor = function(){
@@ -73,13 +72,13 @@ Calculator.prototype.parseFactor = function(){
   var token = this.peek();
   if (token.name === "LPAREN") {
     this.get();
-    return TreeNode("Factor", "(", this.parseExpression(), ")"); // TODO: Figure out what to do with ( E )
+    return new TreeNode("Factor", "(", this.parseExpression(), ")"); // TODO: Figure out what to do with ( E )
   } else if (token.name === "SUB") {
     this.get();
-    return TreeNode("Factor", "-", this.parseFactor());
+    return new TreeNode("Factor", "-", this.parseFactor());
   } else if (token.name === "NUMBER") {
     this.get();
-    return TreeNode("NUMBER", token.value);
+    return new TreeNode("Factor", token.value);
   }
   throw new Error("Invalid Token");
 }
@@ -97,21 +96,21 @@ Calculator.prototype.parseA = function(){
   }
 }
 
-// TODO
 Calculator.prototype.parseB = function(){
   var nextToken = this.peek();
   if(nextToken && nextToken.name === "MUL") {
     this.get();
-    return new TreeNode("B", "*", this.parseTerm(), this.parseB());
+    return new TreeNode("B", "*", this.parseFactor(), this.parseB());
   } else if(nextToken && nextToken.name == "DIV") {
     this.get();
-    return new TreeNode("B", "/", this.parseTerm(), this.parseB());
+    return new TreeNode("B", "/", this.parseFactor(), this.parseB());
   } else {
     return new TreeNode("B")
   }
 }
 
-let calc = new Calculator("1");
-console.dir( calc.parseExpression() );
+let calc = new Calculator("(1+2)*3");
+console.log( calc.tokenStream );
+// console.log( calc.parseExpression() );
 //console.log(calc.peek());
 // console.log(calc.tokenStream);
