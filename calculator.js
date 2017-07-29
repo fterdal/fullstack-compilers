@@ -40,7 +40,14 @@ Calculator.prototype.lexer = function(inputString) {
     return result;
 }
 
+Calculator.prototype.peek = function() {
+  return this.tokenStream[0];
+}
 
+Calculator.prototype.get = function() {
+  return this.tokenStream.shift();
+}
 
 let calc = new Calculator("(11+2)*3");
-console.log(calc);
+console.log(calc.peek());
+console.log(calc.tokenStream);
